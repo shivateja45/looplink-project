@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List
 from decimal import Decimal
 from datetime import datetime
@@ -15,8 +15,8 @@ class ItemCreate(BaseModel):
     sku: str
     name: str
     category: str
-    quantity: int
-    unit_price: Decimal
+    quantity: int = Field(ge=1)
+    unit_price: Decimal = Field(ge=0)
 
 class TransactionCreate(BaseModel):
     """
