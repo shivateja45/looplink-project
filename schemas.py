@@ -44,4 +44,16 @@ class TransactionResponse(BaseModel):
     store_id: str
     basket_total: Decimal
     stickers_awarded: int
-    shopper_sticker_balance: int  # We add this for convenience (as requested in the spec)
+    shopper_sticker_balance: int  
+
+class RedemptionRequest(BaseModel):
+    redemption_id: str
+    shopper_id: str
+    reward_code: str
+
+class RedemptionResponse(BaseModel):
+    redemption_id: str
+    shopper_id: str
+    reward_code: str
+    stickers_spent: int
+    shopper_sticker_balance: int 
