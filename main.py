@@ -198,7 +198,8 @@ def redeem_rewards(
             shopper_id=existing_tx.shopper_id,
             reward_code=existing_tx.reward_code,
             stickers_spent=existing_tx.stickers_spent,
-            shopper_sticker_balance=shopper.sticker_balance 
+            shopper_sticker_balance=shopper.sticker_balance,
+            timestamp=existing_tx.timestamp 
         )
 
     # B. Validate Reward Code
@@ -244,6 +245,7 @@ def redeem_rewards(
         shopper_id=db_redemption.shopper_id,
         reward_code=db_redemption.reward_code,
         stickers_spent=db_redemption.stickers_spent,
-        shopper_sticker_balance=shopper.sticker_balance
+        shopper_sticker_balance=shopper.sticker_balance,
+        timestamp=db_redemption.timestamp
     )
     

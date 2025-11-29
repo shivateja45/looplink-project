@@ -64,3 +64,4 @@ class RedemptionResponse(BaseModel):
     reward_code: str
     stickers_spent: int
     shopper_sticker_balance: int
+    timestamp: datetime
