@@ -170,4 +170,81 @@ def get_shopper(shopper_id: str, session: Session = Depends(get_session)):
         "transactions": shopper.transactions
     }
 
+# -----------------------------------------------------------------------------
+# ENDPOINT 3: View Rewards Menu
+# -----------------------------------------------------------------------------
+@app.get("/rewards")
+def get_rewards():
+    logger.info("🔍 Fetching rewards list")
+    return REWARD_OPTIONS
+
+# -----------------------------------------------------------------------------
+# ENDPOINT 4: Redeem Stickers
+# -----------------------------------------------------------------------------
+
+@app.post("/redemptions", response_model=RedemptionResponse, status_code=201)
+def redeem_rewards(
+    redemption_in: RedemptionRequest, 
+    session: Session = Depends(get_session)
+):
+    logger.info(f"📥 Processing Redemption: {redemption_in.reward_code} for {redemption_in.shopper_id}")
+
+    # A. Idempotency Check
+    existing_tx = session.get(Redemption, redemption_in.redemption_id)
+    if existing_tx:
+        logger.warning(f"⚠️ Duplicate Redemption: {redemption_in.redemption_id}")
+        shopper = session.get(Shopper, existing_tx.shopper_id)
+        return RedemptionResponse(
+            redemption_id=existing_tx.redemption_id,
+            shopper_id=existing_tx.shopper_id,
+            reward_code=existing_tx.reward_code,
+            stickers_spent=existing_tx.stickers_spent,
+            shopper_sticker_balance=shopper.sticker_balance 
+        )
+
+    # B. Validate Reward Code
+    if redemption_in.reward_code not in REWARD_OPTIONS:
+        valid_codes = list(REWARD_OPTIONS.keys())
+        raise HTTPException(status_code=400, detail=f"Invalid Reward Code. Valid options: {valid_codes}")
+
+    # C. Handle Shopper
+    shopper = session.get(Shopper, redemption_in.shopper_id)
+    if not shopper:
+        logger.warning(f"❌ Shopper not found: {redemption_in.shopper_id}")
+        raise HTTPException(status_code=404, detail="Shopper not found")
+
+    # D. Check Balance
+    cost = REWARD_OPTIONS[redemption_in.reward_code]
+    
+    if shopper.sticker_balance < cost:
+        logger.error(f"❌ Insufficient funds. Has {shopper.sticker_balance}, needs {cost}")
+        raise HTTPException(status_code=400, detail="Insufficient sticker balance")
+
+    # E. Deduct & Save
+    shopper.sticker_balance -= cost
+    session.add(shopper)
+
+    db_redemption = Redemption(
+        redemption_id=redemption_in.redemption_id,
+        shopper_id=redemption_in.shopper_id,
+        reward_code=redemption_in.reward_code,
+        stickers_spent=cost
+    )
+    session.add(db_redemption)
+
+    try:
+        session.commit()
+        session.refresh(db_redemption)
+        logger.info(f"✅ Redemption Successful! Spent {cost}. Remaining: {shopper.sticker_balance}")
+    except Exception as e:
+        logger.error(f"❌ DATABASE ERROR: {e}")
+        raise HTTPException(status_code=500, detail="Database error during redemption")
+
+    return RedemptionResponse(
+        redemption_id=db_redemption.redemption_id,
+        shopper_id=db_redemption.shopper_id,
+        reward_code=db_redemption.reward_code,
+        stickers_spent=db_redemption.stickers_spent,
+        shopper_sticker_balance=shopper.sticker_balance
+    )
     

@@ -55,3 +55,17 @@ class Item(SQLModel, table=True):
     unit_price: Decimal = Field(max_digits=10, decimal_places=2)
 
     transaction: Optional[Transaction] = Relationship(back_populates="items")
+
+
+# -----------------------------------------------------------------------------
+# 4. The Redemption (Spending Stickers)
+# -----------------------------------------------------------------------------
+class Redemption(SQLModel, table=True):
+    """
+    Represents a 'spending' event where a shopper uses stickers for a reward.
+    """
+    redemption_id: str = Field(primary_key=True)
+    shopper_id: str = Field(foreign_key="shopper.shopper_id", index=True)
+    reward_code: str
+    stickers_spent: int
+    timestamp: datetime = Field(default_factory=datetime.utcnow)
