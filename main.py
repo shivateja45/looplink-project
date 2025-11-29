@@ -23,7 +23,6 @@ REWARD_OPTIONS = {
 # -----------------------------------------------------------------------------
 # 1. SETUP LOGGING (The "Black Box" Recorder)
 # -----------------------------------------------------------------------------
-# This tells Python: "Print everything INFO level and above to the terminal"
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",

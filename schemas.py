@@ -4,7 +4,7 @@ from decimal import Decimal
 from datetime import datetime
 
 # -----------------------------------------------------------------------------
-# INPUT SCHEMAS (What the user sends us)
+# TRANSACTION SCHEMAS (Earning Stickers)
 # -----------------------------------------------------------------------------
 
 class ItemCreate(BaseModel):
@@ -29,15 +29,10 @@ class TransactionCreate(BaseModel):
     timestamp: datetime
     items: List[ItemCreate]
 
-
-# -----------------------------------------------------------------------------
-# OUTPUT SCHEMAS (What we send back)
-# -----------------------------------------------------------------------------
-
 class TransactionResponse(BaseModel):
     """
     What we return after processing.
-    Now we include the calculated fields.
+    Now we include the calculated fields (stickers earned, new balance).
     """
     transaction_id: str
     shopper_id: str
@@ -46,14 +41,26 @@ class TransactionResponse(BaseModel):
     stickers_awarded: int
     shopper_sticker_balance: int  
 
+# -----------------------------------------------------------------------------
+# REDEMPTION SCHEMAS (Spending Stickers)
+# -----------------------------------------------------------------------------
+
 class RedemptionRequest(BaseModel):
+    """
+    Represents the user's intent to trade stickers for a specific reward.
+    We require a unique 'redemption_id' for idempotency (safety).
+    """
     redemption_id: str
     shopper_id: str
     reward_code: str
 
 class RedemptionResponse(BaseModel):
+    """
+    Returns the result of the trade, including the cost deduction 
+    and the shopper's updated wallet balance.
+    """
     redemption_id: str
     shopper_id: str
     reward_code: str
     stickers_spent: int
-    shopper_sticker_balance: int 
+    shopper_sticker_balance: int
