@@ -117,3 +117,34 @@ FastAPI automatically provides interactive API docs:
 
 
 ```
+
+Here is a polished version you can paste directly into your `README.md` — concise, clear, and professional:
+
+---
+
+## 🧪 Running Tests
+
+This project includes automated tests covering:
+
+* **Core business logic** — sticker calculation rules and edge cases
+* **System guarantees** — idempotent transaction processing
+
+### 1️⃣ Install Test Dependencies
+
+```bash
+pip install pytest httpx
+```
+
+### 2️⃣ Execute the Test Suite
+
+```bash
+pytest
+```
+
+### ✅ Expected Output
+
+```
+test_app.py ..                                                     [100%]
+2 passed in 0.15s
+```
+
