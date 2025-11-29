@@ -60,13 +60,8 @@ SQLAlchemy’s engine provides efficient pooling for concurrent workloads.
 
 ## 2. Trade-offs: MVP vs Production
 
-| Concern | MVP Decision | Production-ready Approach |
-|--------|-------------|--------------------------|
-| Sticker awarding | Done synchronously | Move to an **Async Job Queue** such as Celery, Kafka, or RabbitMQ |
-| Timezones | Stored “as received” | Strict UTC enforcement and timezone normalization |
-| Scaling | Best-effort concurrency | Horizontal scaling + DB sharding or CQRS if needed |
-
-The current solution optimizes for **clarity and correctness**, not for maximum throughput.
+- **Synchronous Logic**: For this MVP, sticker calculation happens during the API request. In a high-scale production system (1M+ requests), I would move this to an **Asynchronous Job Queue** (like Celery/RabbitMQ) to keep the API response time low.
+- **Timezones**: Currently, timestamps are stored naively or as provided. In production, I would enforce strict UTC storage and conversion at the edge.
 
 ---
 
@@ -87,7 +82,7 @@ curl -X POST http://127.0.0.1:8000/transactions \
   "store_id": "store-01",
   "timestamp": "2025-11-29T10:00:00Z",
   "items": [
-    {"sku": "MILK", "name": "Milk", "quantity": 2, "unit_price": 5, "category": "grocery"},
+    {"sku": "MILK", "name": "Milk", "quantity": 2, "unit_price": 20, "category": "grocery"},
     {"sku": "TOY", "name": "Promo Toy", "quantity": 1, "unit_price": 15, "category": "promo"}
   ]
 }'
@@ -116,7 +111,7 @@ curl -X POST http://127.0.0.1:8000/redemptions \
   -d '{
     "redemption_id": "red-demo-01",
     "shopper_id": "shopper-demo",
-    "reward_code": "MUG"
+    "reward_code": "STICKER_PACK"
   }'
 ```
 
